@@ -45,7 +45,8 @@ import javax.inject.Inject;
 public class MainActivity extends FragmentActivity implements MainActivityContract.View, RecyclerViewAdapter.ClickListener {
 
     private RecyclerView recyclerView;
-    private EditText editText;
+    private AppDataBase appDataBase;
+    private NewsDAO newsDAO;
     private ProgressBar progressBar;
     MainActivityComponent mainActivityComponent;
 
@@ -79,6 +80,9 @@ public class MainActivity extends FragmentActivity implements MainActivityContra
         mainActivityComponent.injectMainActivity(this);
 
         progressBar = findViewById(R.id.progressBar);
+
+        appDataBase = MyApplication.getInstance().getDatabase();
+        newsDAO = appDataBase.getNewsDAO();
 
         displayFragment();
 
@@ -136,4 +140,13 @@ public class MainActivity extends FragmentActivity implements MainActivityContra
     public RecyclerViewAdapter getAdapter(){
         return this.recyclerViewAdapter;
     }
+
+    public AppDataBase getNewsDatabase(){
+        return this.appDataBase;
+    }
+
+    public NewsDAO getNewsDAO(){
+        return this.newsDAO;
+    }
+
 }

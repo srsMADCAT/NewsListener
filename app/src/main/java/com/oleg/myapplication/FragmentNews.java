@@ -47,8 +47,8 @@ public class FragmentNews extends Fragment {
 
         search = getView().findViewById(R.id.search);
 
-        AppDataBase database = MyApplication.getInstance().getDatabase();
-        NewsDAO newsDao = database.getNewsDAO();
+        AppDataBase database =  ((MainActivity)getActivity()).getNewsDatabase();
+        NewsDAO newsDao =  ((MainActivity)getActivity()).getNewsDAO();
 
         if (newsDao.getNews().isEmpty()) {
             ((MainActivity)getActivity()).showError("Database is EMPTY. Check internet connection");
@@ -65,12 +65,11 @@ public class FragmentNews extends Fragment {
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 if (String.valueOf(search.getText()).isEmpty()){
-                    Log.d("Search_BOX", "Query is empty!");
                     ((MainActivity)getActivity()).showData(newsDao.getNews());
-                }else {
+
+                } else {
                     List<NewsModel> newsModels;
                     newsModels = newsDao.getTitle("%" + String.valueOf(search.getText()) + "%");
-
                     ((MainActivity)getActivity()).showData(newsModels);
                 }
             }
