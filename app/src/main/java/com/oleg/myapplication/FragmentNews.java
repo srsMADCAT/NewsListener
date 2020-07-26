@@ -1,13 +1,20 @@
 package com.oleg.myapplication;
 
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 
-import javax.inject.Inject;
+import com.oleg.myapplication.room.AppDataBase;
+import com.oleg.myapplication.room.dao.NewsDAO;
+import com.oleg.myapplication.room.model.NewsModel;
+
+import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -16,9 +23,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 public class FragmentNews extends Fragment {
-
-    @Inject
-    public RecyclerViewAdapter recyclerViewAdapter;
 
     private EditText search;
     private RecyclerView recyclerView;
@@ -39,9 +43,43 @@ public class FragmentNews extends Fragment {
 
         recyclerView = getView().findViewById(R.id.rv_news);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerView.setAdapter(recyclerViewAdapter);
+        recyclerView.setAdapter(((MainActivity)getActivity()).getAdapter());
 
         search = getView().findViewById(R.id.search);
+
+        AppDataBase database = MyApplication.getInstance().getDatabase();
+        NewsDAO newsDao = database.getNewsDAO();
+
+        if (newsDao.getNews().isEmpty()) {
+            ((MainActivity)getActivity()).showError("Database is EMPTY. Check internet connection");
+        } else {
+            ((MainActivity)getActivity()).showData(newsDao.getNews());
+        }
+
+        search.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                if (String.valueOf(search.getText()).isEmpty()){
+                    Log.d("Search_BOX", "Query is empty!");
+                    ((MainActivity)getActivity()).showData(newsDao.getNews());
+                }else {
+                    List<NewsModel> newsModels;
+                    newsModels = newsDao.getTitle("%" + String.valueOf(search.getText()) + "%");
+
+                    ((MainActivity)getActivity()).showData(newsModels);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
     }
 
 

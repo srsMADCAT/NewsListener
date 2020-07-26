@@ -79,5 +79,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         this.data.clear();
         notifyDataSetChanged();
     }
+
 }
 

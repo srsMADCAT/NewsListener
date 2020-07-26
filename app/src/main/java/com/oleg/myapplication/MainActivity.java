@@ -77,51 +77,12 @@ public class MainActivity extends FragmentActivity implements MainActivityContra
 
         mainActivityComponent.injectMainActivity(this);
 
-        recyclerView = findViewById(R.id.recyclerView);
-        recyclerView.setLayoutManager(new LinearLayoutManager(activityContext));
-        recyclerView.setAdapter(recyclerViewAdapter);
         progressBar = findViewById(R.id.progressBar);
 
-        editText = findViewById(R.id.search);
-
- //       displayFragment();
+        displayFragment();
 
         presenter.loadData();
 
-        AppDataBase database = MyApplication.getInstance().getDatabase();
-        NewsDAO newsDao = database.getNewsDAO();
-
-        if (newsDao.getNews().isEmpty()) {
-            showError("Database is EMPTY. Check internet connection");
-        } else {
-            showData(newsDao.getNews());
-
-        }
-
-        editText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                if (String.valueOf(editText.getText()).isEmpty()){
-                    Log.d("Search_BOX", "Query is empty!");
-                    showData(newsDao.getNews());
-                }else {
-                    List<NewsModel> newsModels;
-                    newsModels = newsDao.getTitle("%" + String.valueOf(editText.getText()) + "%");
-
-                    showData(newsModels);
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-
-            }
-        });
 
     }
 
@@ -136,13 +97,13 @@ public class MainActivity extends FragmentActivity implements MainActivityContra
         recyclerViewAdapter.setData(data);
     }
 
-//    public void displayFragment() {
-//        FragmentNews fragment = FragmentNews.newInstance();
-//        FragmentManager fragmentManager = getSupportFragmentManager();
-//        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-//
-//        fragmentTransaction.add(R.id.fragment_container, fragment).addToBackStack(null).commit();
-//    }
+    public void displayFragment() {
+        FragmentNews fragment = FragmentNews.newInstance();
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+        fragmentTransaction.add(R.id.fragment_container, fragment).addToBackStack(null).commit();
+    }
 
 
     @Override
@@ -168,5 +129,9 @@ public class MainActivity extends FragmentActivity implements MainActivityContra
     @Override
     public void onPointerCaptureChanged(boolean hasCapture) {
 
+    }
+
+    public RecyclerViewAdapter getAdapter(){
+        return this.recyclerViewAdapter;
     }
 }
