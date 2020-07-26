@@ -113,4 +113,5 @@ public class Article {
         this.publishedAt = publishedAt;
         this.content = content;
     }
+
 }

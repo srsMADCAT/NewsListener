@@ -1,10 +1,14 @@
 package com.oleg.myapplication.mvp;
 
+import com.oleg.myapplication.MyApplication;
+import com.oleg.myapplication.model.Article;
 import com.oleg.myapplication.model.BaseResponse;
-import com.oleg.myapplication.repository.insert.InsertRepository;
 import com.oleg.myapplication.retrofit.APIInterface;
+import com.oleg.myapplication.room.AppDataBase;
 import com.oleg.myapplication.room.dao.NewsDAO;
 import com.oleg.myapplication.room.model.NewsModel;
+
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -18,6 +22,11 @@ public class PresenterImpl implements MainActivityContract.Presenter {
     APIInterface apiInterface;
     MainActivityContract.View mView;
 
+
+    AppDataBase database = MyApplication.getInstance().getDatabase();
+    NewsDAO newsDao = database.getNewsDAO();
+
+    List<NewsModel> newsModels;
 
     @Inject
     public PresenterImpl(APIInterface apiInterface, MainActivityContract.View mView) {
@@ -55,14 +64,19 @@ public class PresenterImpl implements MainActivityContract.Presenter {
                     @Override
                     public void onNext(BaseResponse data) {
 
-                        mView.showData(data);
+                        List<Article> articles = data.getArticles();
+
+                        for (Article article: articles){
+                            newsDao.insert(new NewsModel(article.getTitle(),article.getUrlToImage(),article.getContent()));
+                        }
+
                     }
                 });
     }
 
     @Override
     public void saveData() {
-     // insertRepository.insertNews(new NewsModel("ee","ee","ee"));
+
     }
 
     @Override

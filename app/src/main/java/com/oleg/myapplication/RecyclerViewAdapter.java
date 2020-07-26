@@ -1,5 +1,6 @@
 package com.oleg.myapplication;
 
+import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.oleg.myapplication.model.Article;
+import com.oleg.myapplication.room.model.NewsModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +19,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
-    private List<Article> data;
+    private List<NewsModel> data;
     private RecyclerViewAdapter.ClickListener clickListener;
 
     @Inject
@@ -26,6 +28,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         data = new ArrayList<>();
     }
 
+    @SuppressLint("ResourceType")
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         return new ViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.item_neews, parent, false));
@@ -67,8 +70,13 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         void launchIntent(String name);
     }
 
-    public void setData(List<Article> data) {
+    public void setData(List<NewsModel> data) {
         this.data.addAll(data);
+        notifyDataSetChanged();
+    }
+
+    public void refreshView() {
+        this.data.clear();
         notifyDataSetChanged();
     }
 }

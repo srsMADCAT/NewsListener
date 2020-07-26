@@ -35,7 +35,7 @@ public class RetrofitModule {
 
     @Provides
     @ApplicationScope
-    OkHttpClient getOkHttpCleint(HttpLoggingInterceptor httpLoggingInterceptor) {
+    OkHttpClient getOkHttpClient(HttpLoggingInterceptor httpLoggingInterceptor) {
         return new OkHttpClient.Builder()
                 .addInterceptor(httpLoggingInterceptor)
                 .build();

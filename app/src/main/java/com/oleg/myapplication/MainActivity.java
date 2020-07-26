@@ -2,14 +2,22 @@ package com.oleg.myapplication;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.room.Insert;
 import androidx.room.Room;
 
 import com.oleg.myapplication.di.component.ApplicationComponent;
@@ -19,25 +27,29 @@ import com.oleg.myapplication.di.module.MainActivityContextModule;
 import com.oleg.myapplication.di.module.MainActivityMvpModule;
 import com.oleg.myapplication.di.qualifier.ActivityContext;
 import com.oleg.myapplication.di.qualifier.ApplicationContext;
+import com.oleg.myapplication.model.Article;
 import com.oleg.myapplication.model.BaseResponse;
 import com.oleg.myapplication.mvp.MainActivityContract;
 import com.oleg.myapplication.mvp.PresenterImpl;
+import com.oleg.myapplication.repository.insert.InsertRepository;
 import com.oleg.myapplication.room.AppDataBase;
 import com.oleg.myapplication.room.dao.NewsDAO;
 import com.oleg.myapplication.room.model.NewsModel;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.inject.Inject;
 
-public class MainActivity extends Activity implements MainActivityContract.View, RecyclerViewAdapter.ClickListener {
+public class MainActivity extends FragmentActivity implements MainActivityContract.View, RecyclerViewAdapter.ClickListener {
 
     private RecyclerView recyclerView;
+    private EditText editText;
     private ProgressBar progressBar;
     MainActivityComponent mainActivityComponent;
 
-
     @Inject
     public RecyclerViewAdapter recyclerViewAdapter;
-
 
     @Inject
     @ApplicationContext
@@ -49,8 +61,6 @@ public class MainActivity extends Activity implements MainActivityContract.View,
 
     @Inject
     PresenterImpl presenter;
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,25 +82,67 @@ public class MainActivity extends Activity implements MainActivityContract.View,
         recyclerView.setAdapter(recyclerViewAdapter);
         progressBar = findViewById(R.id.progressBar);
 
-        presenter.loadData();
-      //  presenter.showData();
+        editText = findViewById(R.id.search);
 
+ //       displayFragment();
+
+        presenter.loadData();
 
         AppDataBase database = MyApplication.getInstance().getDatabase();
         NewsDAO newsDao = database.getNewsDAO();
-        newsDao.insertHistoryItem(new NewsModel("title", "url", "content"));
+
+        if (newsDao.getNews().isEmpty()) {
+            showError("Database is EMPTY. Check internet connection");
+        } else {
+            showData(newsDao.getNews());
+
+        }
+
+        editText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+                if (String.valueOf(editText.getText()).isEmpty()){
+                    Log.d("Search_BOX", "Query is empty!");
+                    showData(newsDao.getNews());
+                }else {
+                    List<NewsModel> newsModels;
+                    newsModels = newsDao.getTitle("%" + String.valueOf(editText.getText()) + "%");
+
+                    showData(newsModels);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+
+            }
+        });
+
     }
 
     @Override
     public void launchIntent(String name) {
-        Toast.makeText(mContext, name, Toast.LENGTH_SHORT).show();
-        // startActivity(new Intent(activityContext, DetailActivity.class).putExtra("name", name));
+        Toast.makeText(mContext, name, Toast.LENGTH_LONG).show();
     }
 
     @Override
-    public void showData(BaseResponse data) {
-        recyclerViewAdapter.setData(data.getArticles());
+    public void showData(List<NewsModel> data) {
+        recyclerViewAdapter.refreshView();
+        recyclerViewAdapter.setData(data);
     }
+
+//    public void displayFragment() {
+//        FragmentNews fragment = FragmentNews.newInstance();
+//        FragmentManager fragmentManager = getSupportFragmentManager();
+//        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+//
+//        fragmentTransaction.add(R.id.fragment_container, fragment).addToBackStack(null).commit();
+//    }
 
 
     @Override
